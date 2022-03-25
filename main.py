@@ -1,8 +1,3 @@
-"""
-Simple Bot to reply to Telegram messages taken from the python-telegram-bot examples.
-Source: https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot2.py
-"""
-
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import pandas
