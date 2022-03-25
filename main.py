@@ -31,13 +31,14 @@ def help(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text('Help!')
 
-def price(message):
+def price(update, message):
     price = cg.get_price('bitcoin', 'usd')
     current_price = price['bitcoin']['usd']
     sats_per_dollar = round(100000000 / price['bitcoin']['usd'])
     sats_millionaire = round(1000000 / sats_per_dollar)
     
     response = f'1 BTC = {current_price} USD \n\n 1 USD = {sats_per_dollar} sats \n\n {sats_millionaire} USD to become a sats millionaire'
+    update.message.reply_text(response)
 
 def echo(update, context):
     """Echo the user message."""
