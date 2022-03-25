@@ -5,6 +5,8 @@ Source: https://github.com/python-telegram-bot/python-telegram-bot/blob/master/e
 
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import pandas
+from pycoingecko import CoinGeckoAPI
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -18,6 +20,7 @@ logger = logging.getLogger(__name__)
 TOKEN = os.environ.get("API_KEY")
 
 
+cg = CoinGeckoAPI()
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
@@ -27,6 +30,14 @@ def start(update, context):
 def help(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text('Help!')
+
+def price(message):
+    price = cg.get_price('bitcoin', 'usd')
+    current_price = price['bitcoin']['usd']
+    sats_per_dollar = round(100000000 / price['bitcoin']['usd'])
+    sats_millionaire = round(1000000 / sats_per_dollar)
+    
+    response = f'1 BTC = {current_price} USD \n\n 1 USD = {sats_per_dollar} sats \n\n {sats_millionaire} USD to become a sats millionaire'
 
 def echo(update, context):
     """Echo the user message."""
@@ -49,6 +60,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("price", price))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
