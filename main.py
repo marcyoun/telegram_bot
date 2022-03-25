@@ -4,6 +4,8 @@ from pycoingecko import CoinGeckoAPI
 from datetime import date
 import os 
 
+# web: gunicorn tbb-telegram-bot.wsgi
+
 # API_KEY = os.environ.get("BOT_KEY")
 API_KEY = '5122613375:AAGQY-MU6gvRgApKzMGnMJ1JZ6Vanylzrwg'
 cg = CoinGeckoAPI()

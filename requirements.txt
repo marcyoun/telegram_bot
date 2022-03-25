@@ -1,5 +1,5 @@
 pandas
 numpy
 pycoingecko
-python-telegram-bot
+python-telegram-bot==13.11
 gunicorn
