@@ -15,7 +15,7 @@ PORT = int(os.environ.get('PORT', 5000))
 
 
 logger = logging.getLogger(__name__)
-TOKEN = '5122613375:AAGQY-MU6gvRgApKzMGnMJ1JZ6Vanylzrwg'
+TOKEN = os.environ.get("API_KEY")
 
 
 # Define a few command handlers. These usually take the two arguments update and
