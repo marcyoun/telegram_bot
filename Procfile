@@ -1,1 +1,1 @@
-web: gunicorn secret-lowlands-63983.wsgi
+web: gunicorn tbb-telegram-bot.wsgi
