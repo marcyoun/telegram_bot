@@ -1,7 +1,7 @@
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import pandas
-from pycoingecko import CoinGeckoAPI
+import pandas as pd
+# from pycoingecko import CoinGeckoAPI
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -10,12 +10,11 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 import os
 PORT = int(os.environ.get('PORT', 5000))
 
-
 logger = logging.getLogger(__name__)
 TOKEN = os.environ.get("API_KEY")
 
 
-cg = CoinGeckoAPI()
+# cg = CoinGeckoAPI()
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
@@ -26,14 +25,14 @@ def help(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text('Help!')
 
-def price(update, message):
-    price = cg.get_price('bitcoin', 'usd')
-    current_price = price['bitcoin']['usd']
-    sats_per_dollar = round(100000000 / price['bitcoin']['usd'])
-    sats_millionaire = round(1000000 / sats_per_dollar)
+# def price(update, message):
+#     price = cg.get_price('bitcoin', 'usd')
+#     current_price = price['bitcoin']['usd']
+#     sats_per_dollar = round(100000000 / price['bitcoin']['usd'])
+#     sats_millionaire = round(1000000 / sats_per_dollar)
     
-    response = f'1 BTC = {current_price} USD \n\n 1 USD = {sats_per_dollar} sats \n\n {sats_millionaire} USD to become a sats millionaire'
-    update.message.reply_text(response)
+#     response = f'1 BTC = {current_price} USD \n\n 1 USD = {sats_per_dollar} sats \n\n {sats_millionaire} USD to become a sats millionaire'
+#     update.message.reply_text(response)
 
 def echo(update, context):
     """Echo the user message."""
@@ -65,10 +64,12 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    updater.start_webhook(listen="0.0.0.0",
-                          port=int(PORT),
-                          url_path=TOKEN)
-    updater.bot.setWebhook('https://tbb-telegram-bot.herokuapp.com/' + TOKEN)
+    # updater.start_webhook(listen="0.0.0.0",
+    #                       port=int(PORT),
+    #                       url_path=TOKEN)
+    # updater.bot.setWebhook('https://tbb-telegram-bot.herokuapp.com/' + TOKEN)
+
+    updater.start_polling()
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
