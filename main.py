@@ -12,25 +12,27 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 TOKEN = os.environ.get("API_KEY")
-PORT = int(os.environ.get('PORT', 5000))
 
 cg = CoinGeckoAPI()
 
 # Initialize variables
-commands = ['start', 'price', 'marketcap', 'returns', 'books']
+commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets']
     # Intro
 intro = "Type any of the below commands to get started\n\n"
 price_def = f"/{commands[1]}: get the current price of Bitcoin in cuck bucks\n"
 marketcap_def = f"/{commands[2]}: get the current market cap of Bitcoin in cuck bucks\n"
 returns_def = f"/{commands[3]}: get historical returns in percentage\n\n"
-books_def = f"/{commands[4]}: get recommended Bitcoin, economics, and other books\n"
+books_def = f"/{commands[4]}: get recommended Bitcoin, economics, privacy, and liberty books\n"
+podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privact, and liberty podcasts\n\n"
+wallets_def = f"/{commands[6]}: list of recommneded Bitcoin hardware and software wallets\n"
 metrics = [price_def, marketcap_def, returns_def]
-resources = [books_def]
+resources = [books_def, podcasts_def]
+
 
     # Resources
 books_dict = {
-    'Grokking Bitcoin': 'https://rb.gy/gymfxz',
     'Inventing Bitcoin: The Technology Behind the First Truly Scarce and Decentralized Money Explained': 'https://rb.gy/vqtj64',
+    'Grokking Bitcoin': 'https://rb.gy/gymfxz',
     'The Blocksize War: The Battle for Control Over Bitcoin’s Protocol Rules':'https://rb.gy/4svnhd', 
     'The Bitcoin Standard: The Decentralized Alternative to Central Banking': 'https://rb.gy/lsfdny',
     'The Sovereign Individual: Mastering the Transition to the Information Age': 'https://rb.gy/1ciqvd',
@@ -41,10 +43,33 @@ books_dict = {
     'The Law': 'https://rb.gy/hfsbcp'
 }
 
+podcasts_dict = {
+    'Tales from the Crypt': 'https://talesfromthecrypt.libsyn.com/',
+    'Citadel Dispatch': 'https://citadeldispatch.com/',
+    'Stephan Livera Podcast': 'https://stephanlivera.com/',
+    'What is Money?' : 'https://whatismoneypodcast.com/episodes/dear-eric-weinstein-D4QstV19',
+    'Wake Up Podcast': 'https://anchor.fm/wakeuppod',
+    'Opt Out': 'https://optoutpod.com/'
+}
+
+software_wallets_dict = {
+    'Best Android and privacy wallet\n Samourai wallet': 'https://samouraiwallet.com/',
+    'Best Desktop wallet overall\n Sparrow wallet': 'https://www.sparrowwallet.com/',
+    'Best IOS wallet\n Blue wallet': 'https://bluewallet.io/',
+    'Best Mobile Lightning wallet\n Muun wallet': 'https://muun.com/'
+}
+
+hardware_wallets_dict = {
+    'Best overall\n Coldcard': 'https://coldcard.com/',
+    'Best for DIY\n SeedSigner': 'https://seedsigner.com/',
+
+}
+
 def start(update, context):
     """Send a message when the command /start is issued."""
     metrics_output = "Metrics\n"
     resources_output = "Resources\n"
+    wallets_output = "Wallets\n"
 
     for t in metrics:
         metrics_output += t
@@ -56,6 +81,10 @@ def start(update, context):
 
     for t in sections:
         response += t
+
+    # Add wallets 
+    response += wallets_output
+    response += wallets_def
 
     update.message.reply_text(response)
 
@@ -128,6 +157,31 @@ def books(update, message):
     
     update.message.reply_text(response)
 
+def podcasts(update, message):
+    response = ""
+    for key, value in podcasts_dict.items():
+        response += f'{key}: {value}\n\n'
+    
+    update.message.reply_text(response)
+
+def wallets(update, message):
+    response = "" 
+    sw_text = "----Software Wallets----\n\n"
+    hw_text = "----Hardware Wallets----\n\n"
+
+    response += sw_text
+
+    for key,value in software_wallets_dict.items():
+        response += f'{key}: {value}\n\n'
+
+    response += hw_text
+
+    for key, value in hardware_wallets_dict.items():
+        response += f'{key}: {value}\n\n'
+
+    update.message.reply_text(response)
+
+
 def echo(update, context):
     """Echo the user message."""
     #update.message.reply_text(update.message.text)
@@ -152,6 +206,8 @@ def main():
     dp.add_handler(CommandHandler(commands[2], marketCap))
     dp.add_handler(CommandHandler(commands[3], returns))
     dp.add_handler(CommandHandler(commands[4], books))
+    dp.add_handler(CommandHandler(commands[5], podcasts))
+    dp.add_handler(CommandHandler(commands[6], wallets))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
@@ -160,15 +216,9 @@ def main():
     dp.add_error_handler(error)
 
     updater.start_polling()
-    # updater.start_webhook(listen="0.0.0.0",
-    #                       port=int(PORT),
-    #                       url_path=TOKEN)
-    # updater.bot.setWebhook('https://tbb-telegram-bot.herokuapp.com/' + TOKEN)
 
     updater.idle()
 
 if __name__ == '__main__':
     main()
-
-#test
 
