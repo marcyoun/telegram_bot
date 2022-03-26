@@ -3,12 +3,12 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import pandas as pd
 from pycoingecko import CoinGeckoAPI
 from datetime import date
+import os
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
-import os
 
 logger = logging.getLogger(__name__)
 TOKEN = os.environ.get("API_KEY")
@@ -37,7 +37,6 @@ books_dict = {
     'The Road to Serfdom': 'https://rb.gy/vvexny',
     'When Money Dies: The Nightmare of Deficit Spending, Devaluation, and Hyperinflation in Weimar, Germany': 'https://rb.gy/hngvxq',
     'The Law': 'https://rb.gy/hfsbcp'
-
 }
 
 def start(update, context):
@@ -57,7 +56,6 @@ def start(update, context):
         response += t
 
     update.message.reply_text(response)
-
 
 def price(update, message):
     """Return the price of Bitcoin, in usd, sats per usd, and how many usd needed to become a sats millionaire"""
