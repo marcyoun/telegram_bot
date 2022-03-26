@@ -16,17 +16,18 @@ TOKEN = os.environ.get("API_KEY")
 cg = CoinGeckoAPI()
 
 # Initialize variables
-commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets']
+commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool']
     # Intro
 intro = "Type any of the below commands to get started\n\n"
 price_def = f"/{commands[1]}: get the current price of Bitcoin in cuck bucks\n"
 marketcap_def = f"/{commands[2]}: get the current market cap of Bitcoin in cuck bucks\n"
-returns_def = f"/{commands[3]}: get historical returns in percentage\n\n"
+returns_def = f"/{commands[3]}: get historical compounded returns in percentage\n\n"
 books_def = f"/{commands[4]}: get recommended Bitcoin, economics, privacy, and liberty books\n"
-podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privact, and liberty podcasts\n\n"
+podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privacy, and liberty podcasts\n"
 wallets_def = f"/{commands[6]}: list of recommneded Bitcoin hardware and software wallets\n"
+mempool_def = f"/{commands[7]}: recommended websites to check Bitcoin's mempool\n\n"
 metrics = [price_def, marketcap_def, returns_def]
-resources = [books_def, podcasts_def]
+resources = [books_def, podcasts_def, mempool_def]
 
 
     # Resources
@@ -63,6 +64,10 @@ hardware_wallets_dict = {
     'Best overall\n Coldcard': 'https://coldcard.com/',
     'Best for DIY\n SeedSigner': 'https://seedsigner.com/',
 
+}
+
+mempoool_dict = {
+    'Best overall\n Mempool .space': 'https://mempool.space/'
 }
 
 def start(update, context):
@@ -167,7 +172,7 @@ def podcasts(update, message):
 def wallets(update, message):
     response = "" 
     sw_text = "----Software Wallets----\n\n"
-    hw_text = "----Hardware Wallets----\n\n"
+    hw_text = "\n----Hardware Wallets----\n\n"
 
     response += sw_text
 
@@ -178,6 +183,16 @@ def wallets(update, message):
 
     for key, value in hardware_wallets_dict.items():
         response += f'{key}: {value}\n\n'
+
+    update.message.reply_text(response)
+
+def mempool(update, message):
+    response = ""
+    mempool_text = "Mempool refers to the transactions pending to be mined. The higher the number of transactions in mempool both in terms of count and size, the higher the Bitcoin network fees because senders bid for limited block space. On average, one block contains 2k transactions (depending on transaction size) and is mined every 10 minutes\n\n"
+    response+= mempool_text
+
+    for key, value in mempoool_dict.items():
+        response+= f'{key}: {value}\n\n'
 
     update.message.reply_text(response)
 
@@ -208,6 +223,7 @@ def main():
     dp.add_handler(CommandHandler(commands[4], books))
     dp.add_handler(CommandHandler(commands[5], podcasts))
     dp.add_handler(CommandHandler(commands[6], wallets))
+    dp.add_handler(CommandHandler(commands[7], mempool))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
