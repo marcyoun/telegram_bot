@@ -16,17 +16,18 @@ TOKEN = os.environ.get("API_KEY")
 cg = CoinGeckoAPI()
 
 # Initialize variables
-commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool']
+commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool', 'treasury']
     # Intro
 intro = "Type any of the below commands to get started\n\n"
 price_def = f"/{commands[1]}: get the current price of Bitcoin in cuck bucks\n"
 marketcap_def = f"/{commands[2]}: get the current market cap of Bitcoin in cuck bucks\n"
-returns_def = f"/{commands[3]}: get historical compounded returns in percentage\n\n"
+returns_def = f"/{commands[3]}: get historical compounded returns in percentage\n"
 books_def = f"/{commands[4]}: get recommended Bitcoin, economics, privacy, and liberty books\n"
 podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privacy, and liberty podcasts\n"
 wallets_def = f"/{commands[6]}: list of recommneded Bitcoin hardware and software wallets\n"
 mempool_def = f"/{commands[7]}: recommended websites to check Bitcoin's mempool\n\n"
-metrics = [price_def, marketcap_def, returns_def]
+treasury_def = f"/{commands[8]}: top 10 companies that hold Bitcoin in treasury\n\n"
+metrics = [price_def, marketcap_def, returns_def, treasury_def]
 resources = [books_def, podcasts_def, mempool_def]
 
 
@@ -116,6 +117,7 @@ def marketCap(update, message):
     update.message.reply_text(response)
 
 def returns(update, message):
+    """Return Bitcoin's compounded returns for multiple timeframes"""
     today = date.today()
     today= today.strftime('%d-%m-%Y')
     df = cg.get_coin_market_chart_by_id('bitcoin','usd','max')
@@ -156,6 +158,7 @@ def returns(update, message):
     update.message.reply_text(response)  
 
 def books(update, message):
+    """Return recommended books to read"""
     response = ""
     for key, value in books_dict.items():
         response += f'{key}: {value}\n\n'
@@ -163,6 +166,7 @@ def books(update, message):
     update.message.reply_text(response)
 
 def podcasts(update, message):
+    """Return recommeded podcasts to listen to"""
     response = ""
     for key, value in podcasts_dict.items():
         response += f'{key}: {value}\n\n'
@@ -170,6 +174,7 @@ def podcasts(update, message):
     update.message.reply_text(response)
 
 def wallets(update, message):
+    """Return recommended software and hardware wallets to use"""
     response = "" 
     sw_text = "----Software Wallets----\n\n"
     hw_text = "\n----Hardware Wallets----\n\n"
@@ -187,6 +192,8 @@ def wallets(update, message):
     update.message.reply_text(response)
 
 def mempool(update, message):
+    """Return recommended websites to check mempool"""
+    """Ret"""
     response = ""
     mempool_text = "Mempool refers to the transactions pending to be mined. The higher the number of transactions in mempool both in terms of count and size, the higher the Bitcoin network fees because senders bid for limited block space. On average, one block contains 2k transactions (depending on transaction size) and is mined every 10 minutes\n\n"
     response+= mempool_text
@@ -196,6 +203,22 @@ def mempool(update, message):
 
     update.message.reply_text(response)
 
+def treasury(update, context):
+    """Return top 10 companies that hold Bitcoin in treausry"""
+    df = cg.get_companies_public_treasury_by_coin_id('bitcoin')
+    df = pd.DataFrame(df['companies'])
+    # Clean up numeric column formatting
+    df['total_entry_value_usd'] = round(df['total_entry_value_usd'] / 1000000).astype('int').astype('string') + 'M'
+    df['total_current_value_usd'] = round(df['total_current_value_usd'] / 1000000).astype('int').astype('string') + 'M'
+    df['percentage_of_total_supply'] = round(df['percentage_of_total_supply'] * 100,2).astype('string') + '%'
+
+    response = ""
+
+    for i in range(10):
+        treasury = df.iloc[i,:]
+        response += treasury.to_string() + '\n\n'
+
+    update.message.reply_text(response)
 
 def echo(update, context):
     """Echo the user message."""
@@ -224,6 +247,7 @@ def main():
     dp.add_handler(CommandHandler(commands[5], podcasts))
     dp.add_handler(CommandHandler(commands[6], wallets))
     dp.add_handler(CommandHandler(commands[7], mempool))
+    dp.add_handler(CommandHandler(commands[8], treasury))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
