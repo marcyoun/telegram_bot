@@ -210,7 +210,7 @@ def treasury(update, context):
     # Clean up numeric column formatting
     df['total_entry_value_usd'] = round(df['total_entry_value_usd'] / 1000000).astype('int').astype('string') + 'M'
     df['total_current_value_usd'] = round(df['total_current_value_usd'] / 1000000).astype('int').astype('string') + 'M'
-    df['percentage_of_total_supply'] = round(df['percentage_of_total_supply'] * 100,2).astype('string') + '%'
+    df['percentage_of_total_supply'] = round(df['percentage_of_total_supply'],4).astype('string') + '%'
 
     response = ""
 
