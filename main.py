@@ -16,18 +16,19 @@ TOKEN = os.environ.get("API_KEY")
 cg = CoinGeckoAPI()
 
 # Initialize variables
-commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool', 'treasury']
+commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool', 'treasury', 'drawdown']
     # Intro
 intro = "Type any of the below commands to get started\n\n"
 price_def = f"/{commands[1]}: get the current price of Bitcoin in cuck bucks\n"
 marketcap_def = f"/{commands[2]}: get the current market cap of Bitcoin in cuck bucks\n"
-returns_def = f"/{commands[3]}: get historical compounded returns in percentage\n"
+returns_def = f"/{commands[3]}: get compounded returns for different timeframes\n"
 books_def = f"/{commands[4]}: get recommended Bitcoin, economics, privacy, and liberty books\n"
 podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privacy, and liberty podcasts\n"
 wallets_def = f"/{commands[6]}: list of recommneded Bitcoin hardware and software wallets\n"
 mempool_def = f"/{commands[7]}: recommended websites to check Bitcoin's mempool\n\n"
 treasury_def = f"/{commands[8]}: top 10 companies that hold Bitcoin in treasury\n\n"
-metrics = [price_def, marketcap_def, returns_def, treasury_def]
+drawdown_def = f"/{commands[9]}: get drawdown for different timeframes\n"
+metrics = [price_def, marketcap_def, returns_def, drawdown_def, treasury_def]
 resources = [books_def, podcasts_def, mempool_def]
 
 
@@ -220,6 +221,49 @@ def treasury(update, context):
 
     update.message.reply_text(response)
 
+def dradown(update, context):
+    """Return the drawdon of Bitcoin across multiple timeframes"""
+    today = date.today()
+    today= today.strftime('%d-%m-%Y')
+    df = cg.get_coin_market_chart_by_id('bitcoin','usd','max')
+    prices = df['prices']
+    prices = pd.DataFrame(prices)
+    prices.iloc[:,0] =  pd.to_datetime(prices.iloc[:,0],unit='ms')
+    prices.columns = ['date','price']
+    prices.index = prices['date']
+    prices.drop('date', axis = 1 , inplace=True)
+
+    def get_drawdown(prices):
+        dd = prices / prices.cummax() - 1
+        return (dd.idxmin(), dd.min())
+
+    n = 365
+    one_week_prices = prices.iloc[-7:]
+    one_month_prices = prices.iloc[-30:]
+    three_month_prices = prices.iloc[-90:]
+    one_year_prices = prices.iloc[-n:]
+    three_year_prices = prices.iloc[-n*3:]
+    five_year_prices = prices.iloc[-n*5:]
+
+    prices = [one_week_prices, one_month_prices, three_month_prices, one_year_prices, three_year_prices, five_year_prices]
+    labels = ['1w','1m','3m', '1y', '3y', '5y']
+
+    dds = []
+
+    for i in range(len(prices)):
+        dds.append(get_drawdown(prices[i]))
+
+    response = ""
+    response += "Drawdown represents how much the price declined over the previous peak. For example, if max price for the past 1 month was 60K and current price is 40K, then drawdown would be -33%\n\n"
+
+    for i in range(len(dds)):
+        date_, dd_ = dds[i]
+        dd_ = str(round(dd_[0]*100,2)) + "%"
+        response += f'{labels[i]} --> {dd_} \n\n'
+
+    update.message.reply_text(response)
+
+
 def echo(update, context):
     """Echo the user message."""
     #update.message.reply_text(update.message.text)
@@ -248,6 +292,7 @@ def main():
     dp.add_handler(CommandHandler(commands[6], wallets))
     dp.add_handler(CommandHandler(commands[7], mempool))
     dp.add_handler(CommandHandler(commands[8], treasury))
+    dp.add_handler(CommandHandler(commands[9], dradown))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
