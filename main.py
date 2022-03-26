@@ -16,7 +16,7 @@ TOKEN = os.environ.get("API_KEY")
 cg = CoinGeckoAPI()
 
 # Initialize variables
-commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool', 'treasury', 'drawdown']
+commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool', 'treasury', 'maxdrawdown']
     # Intro
 intro = "Type any of the below commands to get started\n\n"
 price_def = f"/{commands[1]}: get the current price of Bitcoin in cuck bucks\n"
@@ -27,7 +27,7 @@ podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privacy, an
 wallets_def = f"/{commands[6]}: list of recommneded Bitcoin hardware and software wallets\n"
 mempool_def = f"/{commands[7]}: recommended websites to check Bitcoin's mempool\n\n"
 treasury_def = f"/{commands[8]}: top 10 companies that hold Bitcoin in treasury\n\n"
-drawdown_def = f"/{commands[9]}: get drawdown for different timeframes\n"
+drawdown_def = f"/{commands[9]}: get max drawdown for different timeframes\n"
 metrics = [price_def, marketcap_def, returns_def, drawdown_def, treasury_def]
 resources = [books_def, podcasts_def, mempool_def]
 
@@ -254,7 +254,7 @@ def dradown(update, context):
         dds.append(get_drawdown(prices[i]))
 
     response = ""
-    response += "Drawdown represents how much the price declined over the previous peak. For example, if max price for the past 1 month was 60K and current price is 40K, then drawdown would be -33%\n\n"
+    response += "Max drawdown represents peak-trough decline for a given period. For example, given the same period of past 1 month, if max price was 60K and min price was 40K, then max drawdown would be -33%\n\n"
 
     for i in range(len(dds)):
         date_, dd_ = dds[i]
