@@ -118,7 +118,7 @@ def marketCap(update, message):
     update.message.reply_text(response)
 
 def returns(update, message):
-    """Return Bitcoin's compounded returns for multiple timeframes"""
+    """Return Bitcoin's returns for multiple timeframes"""
     today = date.today()
     today= today.strftime('%d-%m-%Y')
     df = cg.get_coin_market_chart_by_id('bitcoin','usd','max')
@@ -128,33 +128,30 @@ def returns(update, message):
     prices.columns = ['date','price']
     prices.index = prices['date']
     prices.drop('date', axis = 1 , inplace=True)
-    rets = prices.pct_change().dropna()
-    compounded_rets = (rets['price'] + 1)
     n = 365
-    one_day_ret = compounded_rets.iloc[-1:].prod() - 1
-    one_week_ret = compounded_rets.iloc[-7:].prod() - 1
-    one_month_ret = compounded_rets.iloc[-30:].prod() - 1
-    three_month_ret = compounded_rets.iloc[-90:].prod() - 1
-    one_year_ret = compounded_rets.iloc[-n:].prod() - 1
-    three_year_ret = compounded_rets.iloc[-n*3:].prod() - 1
-    five_year_ret = compounded_rets.iloc[-n*5:].prod() - 1
+    last_price = prices.iloc[-1]
+    one_day_ret = last_price / prices.iloc[-2] - 1
+    one_week_ret = last_price / prices.iloc[-7] - 1
+    one_month_ret = last_price / prices.iloc[-30] - 1
+    three_month_ret = last_price / prices.iloc[-90] - 1
+    one_year_ret = last_price / prices.iloc[-n] - 1
+    three_year_ret = last_price / prices.iloc[-n*3] - 1
+    five_year_ret = last_price / prices.iloc[-n*5] - 1
 
-    rets = [one_day_ret, one_week_ret, one_month_ret, one_year_ret, three_year_ret, five_year_ret]
-    labels = ['1d','1w','1m','1y', '3y', '5y']
+    rets = [one_day_ret, one_week_ret, one_month_ret, three_month_ret , one_year_ret, three_year_ret, five_year_ret]
+    labels = ['1d','1w','1m','3m','1y', '3y', '5y']
 
     for i in range(len(rets)):
-        if rets[i] < 0:
-            rets[i] = str(round(rets[i]*100,1)) + "%\n"
-        else:
-            rets[i] = " " + str(round(rets[i]*100,1)) + "%\n"
+        rets[i] = " " + str(round(rets[i][0]*100,1)) + "%\n"
 
     string_list = [f'{labels[i]} -->  {rets[i]}' for i in range(len(rets))]
 
-
     response = ""
 
+    response += "Returns refer to the change in cuck buck price of Bitcoin. Bitcoin's returns measured in bitcoin are 0. Remember that one bitcoin is one bitcoin\n\n"
+
     for s in string_list:
-        response += s
+        response += s + '\n'
 
     update.message.reply_text(response)  
 
@@ -221,8 +218,8 @@ def treasury(update, context):
 
     update.message.reply_text(response)
 
-def dradown(update, context):
-    """Return the drawdon of Bitcoin across multiple timeframes"""
+def max_drawdown(update, context):
+    """Return max drawdon of Bitcoin across multiple timeframes"""
     today = date.today()
     today= today.strftime('%d-%m-%Y')
     df = cg.get_coin_market_chart_by_id('bitcoin','usd','max')
@@ -233,7 +230,7 @@ def dradown(update, context):
     prices.index = prices['date']
     prices.drop('date', axis = 1 , inplace=True)
 
-    def get_drawdown(prices):
+    def get_max_drawdown(prices):
         dd = prices / prices.cummax() - 1
         return (dd.idxmin(), dd.min())
 
@@ -251,7 +248,7 @@ def dradown(update, context):
     dds = []
 
     for i in range(len(prices)):
-        dds.append(get_drawdown(prices[i]))
+        dds.append(get_max_drawdown(prices[i]))
 
     response = ""
     response += "Max drawdown represents peak-trough decline for a given period. For example, given the same period of past 1 month, if max price was 60K and min price was 40K, then max drawdown would be -33%\n\n"
@@ -292,7 +289,7 @@ def main():
     dp.add_handler(CommandHandler(commands[6], wallets))
     dp.add_handler(CommandHandler(commands[7], mempool))
     dp.add_handler(CommandHandler(commands[8], treasury))
-    dp.add_handler(CommandHandler(commands[9], dradown))
+    dp.add_handler(CommandHandler(commands[9], max_drawdown))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
