@@ -4,6 +4,9 @@ import pandas as pd
 from pycoingecko import CoinGeckoAPI
 from datetime import date
 import os
+import requests
+import json
+
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -23,13 +26,13 @@ price_def = f"/{commands[1]}: get the current price of Bitcoin in cuck bucks\n"
 marketcap_def = f"/{commands[2]}: get the current market cap of Bitcoin in cuck bucks\n"
 returns_def = f"/{commands[3]}: get compounded returns for different timeframes\n"
 books_def = f"/{commands[4]}: get recommended Bitcoin, economics, privacy, and liberty books\n"
-podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privacy, and liberty podcasts\n"
+podcasts_def = f"/{commands[5]}: get recommended Bitcoin, economics, privacy, and liberty podcasts\n\n"
 wallets_def = f"/{commands[6]}: list of recommneded Bitcoin hardware and software wallets\n"
-mempool_def = f"/{commands[7]}: recommended websites to check Bitcoin's mempool\n\n"
-treasury_def = f"/{commands[8]}: top 10 companies that hold Bitcoin in treasury\n\n"
+mempool_def = f"/{commands[7]}: check recommended Bitcoin network fees  \n\n"
+treasury_def = f"/{commands[8]}: top 10 companies that hold Bitcoin in treasury\n"
 drawdown_def = f"/{commands[9]}: get max drawdown for different timeframes\n"
-metrics = [price_def, marketcap_def, returns_def, drawdown_def, treasury_def]
-resources = [books_def, podcasts_def, mempool_def]
+metrics = [price_def, marketcap_def, returns_def, drawdown_def, treasury_def, mempool_def]
+resources = [books_def, podcasts_def]
 
 
     # Resources
@@ -66,10 +69,6 @@ hardware_wallets_dict = {
     'Best overall\n Coldcard': 'https://coldcard.com/',
     'Best for DIY\n SeedSigner': 'https://seedsigner.com/',
 
-}
-
-mempoool_dict = {
-    'Best overall\n Mempool .space': 'https://mempool.space/'
 }
 
 def start(update, context):
@@ -186,13 +185,21 @@ def wallets(update, message):
     update.message.reply_text(response)
 
 def mempool(update, message):
-    """Return recommended websites to check mempool"""
-    response = ""
-    mempool_text = "Mempool refers to the transactions pending to be mined. The higher the number of transactions in mempool both in terms of count and size, the higher the Bitcoin network fees because senders bid for limited block space. On average, one block contains 2k transactions (depending on transaction size) and is mined every 10 minutes\n\n"
-    response+= mempool_text
+    """Return recommended mempool fees"""
+    response = "Mempool refers to the transactions p    ending to be mined. The higher the number of transactions in mempool both in terms of count and size, the higher the Bitcoin network fees because senders bid for limited block space. On average, one block contains 2k transactions (depending on transaction size) and is mined every 10 minutes\n\n"
+    recommended_link = "https://mempool.space/"
+    fees_link = "https://mempool.space/api/v1/fees/recommended"
 
-    for key, value in mempoool_dict.items():
-        response+= f'{key}: {value}\n\n'
+    mempool_fees = requests.get(fees_link).content
+    mempool_fees = json.loads(mempool_fees.decode('utf-8'))
+    mempool_fees = pd.DataFrame(mempool_fees.items())
+    mempool_fees.iloc[:, 1] = 10*"-" + mempool_fees.iloc[:,1].astype('str') + " sat/vB"
+    mempool_fees.iloc[:,0] = 10*"-" + mempool_fees.iloc[:,0]
+    mempool_fees_string = mempool_fees.to_string(index=False, header=False)
+
+    response += 'Current recommended fees\n'
+    response += mempool_fees_string
+    response += f'\n\n Learn more: {recommended_link}'
 
     update.message.reply_text(response)
 
