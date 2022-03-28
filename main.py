@@ -34,16 +34,16 @@ resources = [books_def, podcasts_def, mempool_def]
 
     # Resources
 books_dict = {
-    'Inventing Bitcoin: The Technology Behind the First Truly Scarce and Decentralized Money Explained': 'https://rb.gy/vqtj64',
-    'Grokking Bitcoin': 'https://rb.gy/gymfxz',
-    'The Blocksize War: The Battle for Control Over Bitcoin’s Protocol Rules':'https://rb.gy/4svnhd', 
-    'The Bitcoin Standard: The Decentralized Alternative to Central Banking': 'https://rb.gy/lsfdny',
-    'The Sovereign Individual: Mastering the Transition to the Information Age': 'https://rb.gy/1ciqvd',
-    'Economics in One Lesson': 'https://rb.gy/btp2qh',
-    'What Has Government Done to Our Money?': 'https://rb.gy/a7objr',
-    'The Road to Serfdom': 'https://rb.gy/vvexny',
-    'When Money Dies: The Nightmare of Deficit Spending, Devaluation, and Hyperinflation in Weimar, Germany': 'https://rb.gy/hngvxq',
-    'The Law': 'https://rb.gy/hfsbcp'
+    'Inventing Bitcoin: The Technology Behind the First Truly Scarce and Decentralized Money Explained by Yan Pritzker': 'https://rb.gy/vqtj64',
+    'Grokking Bitcoin by Kalle Rosenbaum': 'https://rb.gy/gymfxz',
+    'The Blocksize War: The Battle for Control Over Bitcoin’s Protocol Rules by Jonathan Bier':'https://rb.gy/4svnhd', 
+    'The Bitcoin Standard: The Decentralized Alternative to Central Banking by Saifedean Ammous': 'https://rb.gy/lsfdny',
+    'The Sovereign Individual: Mastering the Transition to the Information Age by James Dale Davidson and  William Rees-Mogg': 'https://rb.gy/1ciqvd',
+    'Economics in One Lesson by Henry Hazlitt': 'https://rb.gy/btp2qh',
+    'What Has Government Done to Our Money by Murray N. Rothbard': 'https://rb.gy/a7objr',
+    'The Road to Serfdom by Friedrich Hayek': 'https://rb.gy/vvexny',
+    'When Money Dies: The Nightmare of Deficit Spending, Devaluation, and Hyperinflation in Weimar, Germany by Adam Fergusson': 'https://rb.gy/hngvxq',
+    'The Law by Frédéric Bastiat': 'https://rb.gy/hfsbcp'
 }
 
 podcasts_dict = {
@@ -119,8 +119,6 @@ def marketCap(update, message):
 
 def returns(update, message):
     """Return Bitcoin's returns for multiple timeframes"""
-    today = date.today()
-    today= today.strftime('%d-%m-%Y')
     df = cg.get_coin_market_chart_by_id('bitcoin','usd','max')
     prices = df['prices']
     prices = pd.DataFrame(prices)
@@ -146,9 +144,7 @@ def returns(update, message):
 
     string_list = [f'{labels[i]} -->  {rets[i]}' for i in range(len(rets))]
 
-    response = ""
-
-    response += "Returns refer to the change in cuck buck price of Bitcoin. Bitcoin's returns measured in bitcoin are 0. Remember that one bitcoin is one bitcoin\n\n"
+    response = "Returns refer to the change in cuck buck price of Bitcoin. Bitcoin's returns measured in bitcoin are 0. Remember that one bitcoin is one bitcoin\n\n"
 
     for s in string_list:
         response += s + '\n'
@@ -191,7 +187,6 @@ def wallets(update, message):
 
 def mempool(update, message):
     """Return recommended websites to check mempool"""
-    """Ret"""
     response = ""
     mempool_text = "Mempool refers to the transactions pending to be mined. The higher the number of transactions in mempool both in terms of count and size, the higher the Bitcoin network fees because senders bid for limited block space. On average, one block contains 2k transactions (depending on transaction size) and is mined every 10 minutes\n\n"
     response+= mempool_text
@@ -220,8 +215,6 @@ def treasury(update, context):
 
 def max_drawdown(update, context):
     """Return max drawdon of Bitcoin across multiple timeframes"""
-    today = date.today()
-    today= today.strftime('%d-%m-%Y')
     df = cg.get_coin_market_chart_by_id('bitcoin','usd','max')
     prices = df['prices']
     prices = pd.DataFrame(prices)
@@ -245,13 +238,8 @@ def max_drawdown(update, context):
     prices = [one_week_prices, one_month_prices, three_month_prices, one_year_prices, three_year_prices, five_year_prices]
     labels = ['1w','1m','3m', '1y', '3y', '5y']
 
-    dds = []
-
-    for i in range(len(prices)):
-        dds.append(get_max_drawdown(prices[i]))
-
-    response = ""
-    response += "Max drawdown represents peak-trough decline for a given period. For example, given the same period of past 1 month, if max price was 60K and min price was 40K, then max drawdown would be -33%\n\n"
+    dds = [get_max_drawdown(prices[i]) for i in range(len(prices))]
+    response = "Max drawdown represents peak-trough decline for a given period. For example, given the same period of past 1 month, if max price was 60K and min price was 40K, then max drawdown would be -33%\n\n"
 
     for i in range(len(dds)):
         date_, dd_ = dds[i]
@@ -259,7 +247,6 @@ def max_drawdown(update, context):
         response += f'{labels[i]} --> {dd_} \n\n'
 
     update.message.reply_text(response)
-
 
 def echo(update, context):
     """Echo the user message."""
