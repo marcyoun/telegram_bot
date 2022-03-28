@@ -186,7 +186,7 @@ def wallets(update, message):
 
 def mempool(update, message):
     """Return recommended mempool fees"""
-    response = "Mempool refers to the transactions p    ending to be mined. The higher the number of transactions in mempool both in terms of count and size, the higher the Bitcoin network fees because senders bid for limited block space. On average, one block contains 2k transactions (depending on transaction size) and is mined every 10 minutes\n\n"
+    response = "Mempool refers to the transactions pending to be mined. The higher the number of transactions in mempool both in terms of count and size, the higher the Bitcoin network fees because senders bid for limited block space. On average, one block contains 2k transactions (depending on transaction size) and is mined every 10 minutes\n\n"
     recommended_link = "https://mempool.space/"
     fees_link = "https://mempool.space/api/v1/fees/recommended"
 
