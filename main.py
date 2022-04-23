@@ -50,12 +50,13 @@ books_dict = {
 }
 
 podcasts_dict = {
-    'Tales from the Crypt': 'https://talesfromthecrypt.libsyn.com/',
-    'Citadel Dispatch': 'https://citadeldispatch.com/',
-    'Stephan Livera Podcast': 'https://stephanlivera.com/',
-    'What is Money?' : 'https://whatismoneypodcast.com/episodes/dear-eric-weinstein-D4QstV19',
-    'Wake Up Podcast': 'https://anchor.fm/wakeuppod',
-    'Opt Out': 'https://optoutpod.com/'
+    'Best for newbies - Start from here\n Btcoin Audible' : 'https://bitcoinaudible.com/',
+    'Best for contrarian views as well as weekly Bitcoin updates\n Tales from the Crypt' : 'https://talesfromthecrypt.libsyn.com/',
+    'Best for actionable advice on Bitcoin tools and privacy (A bit technical and not recommended for new comers)\n Citadel Dispatch' : 'https://citadeldispatch.com/',
+    'Best overall for Bitcoin and Austrian Economics\n Stephan Livera Podcast' : 'https://stephanlivera.com/',
+    'Best for philosophy and understanding money\n What is Money?' : 'https://whatismoneypodcast.com/episodes/dear-eric-weinstein-D4QstV19',
+    'Best for unplugging yourself from the matrix - Good dives into freedom, psychology, and philosophy\n Wake Up Podcast' : 'https://anchor.fm/wakeuppod',
+    'Best for those who want to learn more about privacy in a digital world\n Opt Out': 'https://optoutpod.com/'
 }
 
 software_wallets_dict = {
