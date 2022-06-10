@@ -6,6 +6,7 @@ from datetime import date
 import os
 import requests
 import json
+import tweepy
 
 
 # Enable logging
@@ -16,10 +17,16 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 TOKEN = os.environ.get("API_KEY")
 
+# Twitter Authentication
+consumer_key = os.environ.get("consumer_key")
+consumer_secret = os.environ.get("consumer_secret")
+access_token = os.environ.get("access_token")
+access_token_secret = os.environ.get("access_token_secret")
+
 cg = CoinGeckoAPI()
 
 # Initialize variables
-commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool', 'treasury', 'maxdrawdown']
+commands = ['start', 'price', 'marketcap', 'returns', 'books', 'podcasts', 'wallets', 'mempool', 'treasury', 'maxdrawdown', 'news']
     # Intro
 intro = "Type any of the below commands to get started\n\n"
 price_def = f"/{commands[1]}: get the current price of Bitcoin in cuck bucks\n"
@@ -31,8 +38,10 @@ wallets_def = f"/{commands[6]}: list of recommneded Bitcoin hardware and softwar
 mempool_def = f"/{commands[7]}: check recommended Bitcoin network fees  \n\n"
 treasury_def = f"/{commands[8]}: top 10 companies that hold Bitcoin in treasury\n"
 drawdown_def = f"/{commands[9]}: get max drawdown for different timeframes\n"
+news_def = f"/{commands[10]}: Twitter Bitcoin and Macro news\n\n"
 metrics = [price_def, marketcap_def, returns_def, drawdown_def, treasury_def, mempool_def]
 resources = [books_def, podcasts_def]
+
 
 
     # Resources
@@ -74,6 +83,8 @@ hardware_wallets_dict = {
 
 def start(update, context):
     """Send a message when the command /start is issued."""
+    news_output = "UPDATE: New news section available now!\n"
+    news_output += news_def
     metrics_output = "Metrics\n"
     resources_output = "Resources\n"
     wallets_output = "Wallets\n"
@@ -84,6 +95,7 @@ def start(update, context):
         resources_output += t
 
     response = intro
+    response += news_output
     sections = [metrics_output, resources_output]
 
     for t in sections:
@@ -256,6 +268,57 @@ def max_drawdown(update, context):
 
     update.message.reply_text(response)
 
+# Add timeline tweets 
+callback_uri = 'oob' 
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret, access_token, access_token_secret, callback_uri)
+api = tweepy.API(auth)
+my_timeline = api.home_timeline()
+authors = ['zerohedge','BitcoinMagazine']
+
+def extract_timeline_as_df(timeline_list, authors):
+    columns = set()
+    allowed_types = [str, int]
+    tweets_data = []
+    for status in my_timeline:
+        status_dict = dict(vars(status))
+        keys = status_dict.keys()
+        single_tweet_data = {"created_at": status_dict['_json']['created_at'], "user": status.user.screen_name, "author": status.author.screen_name}
+
+        for k in keys:
+            try:
+                v_type = type(status_dict[k])
+            except:
+                v_type = None
+            if v_type != None:
+                if v_type in allowed_types:
+                    single_tweet_data[k] = status_dict[k]
+                    columns.add(k)
+        tweets_data.append(single_tweet_data)
+    header_cols = list(columns)
+    header_cols.append('created_at')
+    header_cols.append('user')
+    header_cols.append('author')
+    
+    df = pd.DataFrame(tweets_data, columns = header_cols)
+    df = df[df.user.isin(authors)][['user','text', 'created_at']]
+    return df
+
+
+def twitter_news(update, context):
+    twitter_timeline = extract_timeline_as_df(my_timeline, authors)
+    n = twitter_timeline.shape[0]
+    for i in range(n):
+        cols = list(twitter_timeline.columns)
+        response = ""
+        for col in range(len(cols)):
+            response += twitter_timeline.iloc[i,col] + "\n\n"
+        response += "-------------\n"
+
+    update.message.reply_text(response)
+
+        
+
+
 def echo(update, context):
     """Echo the user message."""
     #update.message.reply_text(update.message.text)
@@ -285,6 +348,7 @@ def main():
     dp.add_handler(CommandHandler(commands[7], mempool))
     dp.add_handler(CommandHandler(commands[8], treasury))
     dp.add_handler(CommandHandler(commands[9], max_drawdown))
+    dp.add_handler(CommandHandler(commands[10], twitter_news))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
@@ -297,5 +361,7 @@ def main():
     updater.idle()
 
 if __name__ == '__main__':
+    # Heroku 
     main()
+
 
