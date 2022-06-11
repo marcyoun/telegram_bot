@@ -23,6 +23,7 @@ consumer_secret = os.environ.get("consumer_secret")
 access_token = os.environ.get("access_token")
 access_token_secret = os.environ.get("access_token_secret")
 
+
 cg = CoinGeckoAPI()
 
 # Initialize variables
@@ -272,14 +273,13 @@ def max_drawdown(update, context):
 callback_uri = 'oob' 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret, access_token, access_token_secret, callback_uri)
 api = tweepy.API(auth)
-my_timeline = api.home_timeline()
-authors = ['zerohedge','BitcoinMagazine']
+authors = ['zerohedge','BitcoinMagazine', 'Fxhedgers', 'WallStreetSilv', 'LynAldenContact']
 
 def extract_timeline_as_df(timeline_list, authors):
     columns = set()
     allowed_types = [str, int]
     tweets_data = []
-    for status in my_timeline:
+    for status in timeline_list:
         status_dict = dict(vars(status))
         keys = status_dict.keys()
         single_tweet_data = {"created_at": status_dict['_json']['created_at'], "user": status.user.screen_name, "author": status.author.screen_name}
@@ -305,6 +305,7 @@ def extract_timeline_as_df(timeline_list, authors):
 
 
 def twitter_news(update, context):
+    my_timeline = api.home_timeline()
     twitter_timeline = extract_timeline_as_df(my_timeline, authors)
     n = twitter_timeline.shape[0]
     for i in range(n):
@@ -315,8 +316,6 @@ def twitter_news(update, context):
         response += "-------------\n"
 
     update.message.reply_text(response)
-
-        
 
 
 def echo(update, context):
